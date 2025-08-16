@@ -3,7 +3,7 @@
     <header class="header">
       <div class="header-content">
         <div class="logo">
-          <h1>🚨 요기조심</h1>
+          <h1>요기조심</h1>
         </div>
         <button class="subscribe-btn" @click="scrollToSignup">
           무료 구독하기
@@ -11,12 +11,7 @@
       </div>
     </header>
 
-    <main class="main-content">
-      <HeroSection />
-      <ProcessSection />
-      <SignupSection ref="signupSection" />
-      <SubscribersSection />
-    </main>
+    <router-view />
 
     <footer class="footer">
       <p>&copy; 2024 요기조심. 안전한 지역사회를 만들어갑니다.</p>
@@ -25,22 +20,15 @@
 </template>
 
 <script>
-import HeroSection from './components/HeroSection.vue'
-import ProcessSection from './components/ProcessSection.vue'
-import SignupSection from './components/SignupSection.vue'
-import SubscribersSection from './components/SubscribersSection.vue'
-
 export default {
   name: 'App',
-  components: {
-    HeroSection,
-    ProcessSection,
-    SignupSection,
-    SubscribersSection
-  },
   methods: {
     scrollToSignup() {
-      this.$refs.signupSection.$el.scrollIntoView({ behavior: 'smooth' })
+      // Home 컴포넌트의 signupSection으로 스크롤
+      const signupSection = document.querySelector('.signup-section');
+      if (signupSection) {
+        signupSection.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   }
 }
