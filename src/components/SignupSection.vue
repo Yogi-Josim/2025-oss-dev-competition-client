@@ -2,13 +2,18 @@
   <section class="signup-section">
     <div class="container">
       <div class="signup-container">
-        <h2>서비스 가입하기</h2>
-        <p class="description">
-          이메일을 입력하고 구독할 지역을 선택하여 주변 위험 상황을 실시간으로 받아보세요.
-        </p>
+        <div v-if="isSubmitted" class="success-message">
+          <h3>가입이 완료되었습니다!</h3>
+          <p>이제 주변 위험 상황을 실시간으로 받아보실 수 있습니다.</p>
+        </div>
 
-        <form @submit.prevent="handleSubmit" class="signup-form">
-          <!-- 이메일 입력 -->
+        <form v-else @submit.prevent="handleSubmit" class="signup-form">
+          <h2>서비스 가입하기</h2>
+          <p class="description">
+            이메일을 입력하고 구독할 지역을 선택하여 주변 위험 상황을 실시간으로
+            받아보세요.
+          </p>
+
           <div class="form-group">
             <label for="email">이메일 주소</label>
             <input
@@ -21,74 +26,64 @@
             />
           </div>
 
-          <!-- 관심 구독 구역 선택 -->
           <div class="form-group">
             <div class="region-header">
               <label>관심 구독 구역 선택</label>
-              <button 
-                type="button" 
-                @click="addSelectedRegion" 
+              <button
+                type="button"
+                @click="addSelectedRegion"
                 class="add-region-btn"
-                :disabled="!isRegionSelectionValid"
+                :disabled="!isRegionSelectionValid()"
               >
                 + 구역 추가
               </button>
             </div>
             <div class="region-selection">
-              <!-- 시/도 선택 -->
-              <select 
-                v-model="formData.selectedProvince" 
+              <select
+                v-model="formData.selectedProvince"
                 @change="onProvinceChange"
                 class="region-dropdown province-dropdown"
               >
                 <option value="">시/도를 선택하세요</option>
-                <option 
-                  v-for="region in availableRegions" 
-                  :key="region.id" 
+                <option
+                  v-for="region in availableRegions"
+                  :key="region.id"
                   :value="region.id"
                 >
                   {{ region.name }}
                 </option>
               </select>
-              
-              <!-- 시/군/구 선택 -->
-              <select 
-                v-model="formData.selectedDistrict" 
-                @change="onDistrictChange"
+
+              <select
+                v-model="formData.selectedDistrict"
                 class="region-dropdown district-dropdown"
                 :disabled="!formData.selectedProvince"
               >
                 <option value="">시/군/구를 선택하세요</option>
-                <option 
-                  v-for="district in getAvailableDistricts()" 
-                  :key="district.id" 
+                <option
+                  v-for="district in getAvailableDistricts()"
+                  :key="district.id"
                   :value="district.id"
                 >
                   {{ district.name }}
                 </option>
               </select>
             </div>
-            
-            <!-- 선택된 지역 표시 -->
-            <div class="selected-region-display" v-if="getSelectedRegionText()">
-              <h4>현재 선택된 구역:</h4>
-              <div class="selected-region-tag">
-                {{ getSelectedRegionText() }}
-              </div>
-            </div>
-            
-            <!-- 선택된 모든 지역들 표시 -->
-            <div class="all-selected-regions" v-if="formData.selectedRegions.length > 0">
+
+            <div
+              class="all-selected-regions"
+              v-if="formData.selectedRegions.length > 0"
+            >
               <h4>선택한 구역:</h4>
               <div class="selected-regions-list">
-                <span 
-                  v-for="(region, index) in formData.selectedRegions" 
+                <span
+                  v-for="(region, index) in formData.selectedRegions"
                   :key="index"
                   class="selected-region-tag"
                 >
                   {{ region.text }}
-                  <button 
-                    @click="removeRegion(index)" 
+                  <button
+                    @click="removeRegion(index)"
                     class="remove-region-btn"
                     type="button"
                   >
@@ -99,32 +94,31 @@
             </div>
           </div>
 
-          <!-- 레포트 수신 주기 -->
           <div class="form-group">
             <div class="report-header">
               <label>레포트 수신 주기</label>
               <div class="help-container">
-                <button 
-                  type="button" 
-                  class="help-btn"
-                >
-                  ?
-                </button>
+                <button type="button" class="help-btn">?</button>
                 <div class="help-tooltip">
                   <div class="tooltip-content">
-                    <p><strong>매일 받기:</strong> 매일 오전 8시에 전날 있었던 사건/사고 레포트를 제공합니다.</p>
-                    <p><strong>주간 받기:</strong> 매주 월요일 오전 8시에 저번주에 있었던 사건/사고 레포트를 제공합니다.</p>
+                    <p>
+                      <strong>매일 받기:</strong> 매일 오전 8시에 전날 있었던
+                      사건/사고 레포트를 제공합니다.
+                    </p>
+                    <p>
+                      <strong>주간 받기:</strong> 매주 월요일 오전 8시에
+                      저번주에 있었던 사건/사고 레포트를 제공합니다.
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-            
             <div class="report-options">
               <label class="radio-option">
                 <input
                   type="radio"
                   v-model="formData.reportFrequency"
-                  value="daily"
+                  value="DAILY"
                 />
                 <span class="radio-custom"></span>
                 매일 받기
@@ -133,7 +127,7 @@
                 <input
                   type="radio"
                   v-model="formData.reportFrequency"
-                  value="weekly"
+                  value="WEEKLY"
                 />
                 <span class="radio-custom"></span>
                 주간 받기
@@ -141,18 +135,16 @@
             </div>
           </div>
 
-          <!-- 가입 버튼 -->
-          <button type="submit" class="submit-btn" :disabled="!isFormValid">
-            🚀 서비스 가입하기
+          <button
+            type="submit"
+            class="submit-btn"
+            :disabled="!isFormValid || isLoading"
+          >
+            {{ isLoading ? "처리 중..." : "서비스 가입하기" }}
           </button>
-        </form>
 
-        <!-- 가입 완료 메시지 -->
-        <div v-if="isSubmitted" class="success-message">
-          <h3>🎉 가입이 완료되었습니다!</h3>
-          <p>입력하신 이메일로 확인 메일을 발송했습니다.</p>
-          <p>이제 주변 위험 상황을 실시간으로 받아보실 수 있습니다.</p>
-        </div>
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        </form>
       </div>
     </div>
   </section>
@@ -160,276 +152,128 @@
 
 <script>
 export default {
-  name: 'SignupSection',
+  name: "SignupSection",
   data() {
     return {
       formData: {
-        email: '',
-        selectedProvince: '',
-        selectedDistrict: '',
+        email: "",
+        selectedProvince: "",
+        selectedDistrict: "",
         selectedRegions: [],
-        reportFrequency: 'daily'
+        reportFrequency: "DAILY", // 기본값
       },
       isSubmitted: false,
-      availableRegions: [
-        {
-          id: 'seoul',
-          name: '서울특별시',
-          districts: [
-            { id: 'seoul-gangnam', name: '강남구' },
-            { id: 'seoul-gangdong', name: '강동구' },
-            { id: 'seoul-gangbuk', name: '강북구' },
-            { id: 'seoul-gangseo', name: '강서구' },
-            { id: 'seoul-gwanak', name: '관악구' },
-            { id: 'seoul-gwangjin', name: '광진구' },
-            { id: 'seoul-guro', name: '구로구' },
-            { id: 'seoul-nowon', name: '노원구' },
-            { id: 'seoul-dobong', name: '도봉구' },
-            { id: 'seoul-dongdaemun', name: '동대문구' },
-            { id: 'seoul-dongjak', name: '동작구' },
-            { id: 'seoul-mapo', name: '마포구' },
-            { id: 'seoul-seodaemun', name: '서대문구' },
-            { id: 'seoul-seocho', name: '서초구' },
-            { id: 'seoul-seongbuk', name: '성북구' },
-            { id: 'seoul-songpa', name: '송파구' },
-            { id: 'seoul-yangcheon', name: '양천구' },
-            { id: 'seoul-yeongdeungpo', name: '영등포구' },
-            { id: 'seoul-yongsan', name: '용산구' },
-            { id: 'seoul-eunpyeong', name: '은평구' },
-            { id: 'seoul-jongno', name: '종로구' },
-            { id: 'seoul-jung', name: '중구' },
-            { id: 'seoul-jungnang', name: '중랑구' }
-          ]
-        },
-        {
-          id: 'gyeonggi',
-          name: '경기도',
-          districts: [
-            { id: 'gyeonggi-suwon', name: '수원시' },
-            { id: 'gyeonggi-seongnam', name: '성남시' },
-            { id: 'gyeonggi-yongin', name: '용인시' },
-            { id: 'gyeonggi-bucheon', name: '부천시' },
-            { id: 'gyeonggi-ansan', name: '안산시' },
-            { id: 'gyeonggi-anyang', name: '안양시' },
-            { id: 'gyeonggi-pyeongtaek', name: '평택시' },
-            { id: 'gyeonggi-siheung', name: '시흥시' },
-            { id: 'gyeonggi-gwangmyeong', name: '광명시' },
-            { id: 'gyeonggi-gwangju', name: '광주시' },
-            { id: 'gyeonggi-hanam', name: '하남시' },
-            { id: 'gyeonggi-uijeongbu', name: '의정부시' },
-            { id: 'gyeonggi-goyang', name: '고양시' },
-            { id: 'gyeonggi-namyangju', name: '남양주시' },
-            { id: 'gyeonggi-osan', name: '오산시' },
-            { id: 'gyeonggi-gunpo', name: '군포시' },
-            { id: 'gyeonggi-uiwang', name: '의왕시' },
-            { id: 'gyeonggi-hwaseong', name: '화성시' },
-            { id: 'gyeonggi-paju', name: '파주시' },
-            { id: 'gyeonggi-yangju', name: '양주시' },
-            { id: 'gyeonggi-icheon', name: '이천시' },
-            { id: 'gyeonggi-anseong', name: '안성시' },
-            { id: 'gyeonggi-gimpo', name: '김포시' },
-            { id: 'gyeonggi-yeoju', name: '여주시' }
-          ]
-        },
-        {
-          id: 'incheon',
-          name: '인천광역시',
-          districts: [
-            { id: 'incheon-jung', name: '중구' },
-            { id: 'incheon-dong', name: '동구' },
-            { id: 'incheon-michuhol', name: '미추홀구' },
-            { id: 'incheon-yeonpyeong', name: '연수구' },
-            { id: 'incheon-namdong', name: '남동구' },
-            { id: 'incheon-bupyeong', name: '부평구' },
-            { id: 'incheon-gyeyang', name: '계양구' },
-            { id: 'incheon-seo', name: '서구' },
-            { id: 'incheon-ganghwa', name: '강화군' },
-            { id: 'incheon-ongjin', name: '옹진군' }
-          ]
-        },
-        {
-          id: 'busan',
-          name: '부산광역시',
-          districts: [
-            { id: 'busan-jung', name: '중구' },
-            { id: 'busan-seo', name: '서구' },
-            { id: 'busan-dong', name: '동구' },
-            { id: 'busan-yeongdo', name: '영도구' },
-            { id: 'busan-busanjin', name: '부산진구' },
-            { id: 'busan-dongrae', name: '동래구' },
-            { id: 'busan-nam', name: '남구' },
-            { id: 'busan-buk', name: '북구' },
-            { id: 'busan-haeundae', name: '해운대구' },
-            { id: 'busan-saha', name: '사하구' },
-            { id: 'busan-geumjeong', name: '금정구' },
-            { id: 'busan-gangseo', name: '강서구' },
-            { id: 'busan-yeongjong', name: '연제구' },
-            { id: 'busan-suyeong', name: '수영구' },
-            { id: 'busan-sasang', name: '사상구' },
-            { id: 'busan-gijang', name: '기장군' }
-          ]
-        },
-        {
-          id: 'daegu',
-          name: '대구광역시',
-          districts: [
-            { id: 'daegu-jung', name: '중구' },
-            { id: 'daegu-dong', name: '동구' },
-            { id: 'daegu-seo', name: '서구' },
-            { id: 'daegu-nam', name: '남구' },
-            { id: 'daegu-buk', name: '북구' },
-            { id: 'daegu-suseong', name: '수성구' },
-            { id: 'daegu-dalseo', name: '달서구' },
-            { id: 'daegu-dalseong', name: '달성군' }
-          ]
-        },
-        {
-          id: 'daejeon',
-          name: '대전광역시',
-          districts: [
-            { id: 'daejeon-dong', name: '동구' },
-            { id: 'daejeon-jung', name: '중구' },
-            { id: 'daejeon-seo', name: '서구' },
-            { id: 'daejeon-yuseong', name: '유성구' },
-            { id: 'daejeon-daedeok', name: '대덕구' }
-          ]
-        },
-        {
-          id: 'gwangju',
-          name: '광주광역시',
-          districts: [
-            { id: 'gwangju-dong', name: '동구' },
-            { id: 'gwangju-seo', name: '서구' },
-            { id: 'gwangju-nam', name: '남구' },
-            { id: 'gwangju-buk', name: '북구' },
-            { id: 'gwangju-gwangseo', name: '광산구' }
-          ]
-        },
-        {
-          id: 'ulsan',
-          name: '울산광역시',
-          districts: [
-            { id: 'ulsan-jung', name: '중구' },
-            { id: 'ulsan-nam', name: '남구' },
-            { id: 'ulsan-dong', name: '동구' },
-            { id: 'ulsan-buk', name: '북구' },
-            { id: 'ulsan-ulju', name: '울주군' }
-          ]
-        }
-      ]
-    }
+      isLoading: false,
+      errorMessage: "",
+      availableRegions: [],
+    };
   },
   computed: {
     isFormValid() {
-      return this.formData.email && 
-             this.formData.reportFrequency
+      return (
+        this.formData.email &&
+        this.formData.reportFrequency &&
+        this.formData.selectedRegions.length > 0
+      );
+    },
+  },
+  async created() {
+    try {
+      const response = await fetch("http://localhost:8080/api/regions");
+      if (!response.ok) {
+        throw new Error("지역 목록을 불러오는 데 실패했습니다.");
+      }
+      const data = await response.json();
+      this.availableRegions = data;
+    } catch (error) {
+      console.error(error);
     }
   },
   methods: {
-    // 시/도 선택 시
     onProvinceChange() {
-      this.formData.selectedDistrict = ''
+      this.formData.selectedDistrict = "";
     },
-    
-    // 시/군/구 선택 시
-    onDistrictChange() {
-      // 추가 로직이 필요하면 여기에
-    },
-    
-    // 선택된 시/도에 해당하는 시/군/구 목록 가져오기
     getAvailableDistricts() {
-      if (!this.formData.selectedProvince) return []
-      const region = this.availableRegions.find(r => r.id === this.formData.selectedProvince)
-      return region ? region.districts : []
+      if (!this.formData.selectedProvince) return [];
+      const region = this.availableRegions.find(
+        (r) => r.id === this.formData.selectedProvince
+      );
+      return region ? region.districts : [];
     },
-    
-    // 현재 선택된 지역을 텍스트로 변환
     getSelectedRegionText() {
-      if (!this.formData.selectedProvince) return ''
-      
-      const region = this.availableRegions.find(r => r.id === this.formData.selectedProvince)
-      if (!region) return ''
-      
-      let text = region.name
-      
-      if (this.formData.selectedDistrict) {
-        const district = region.districts.find(d => d.id === this.formData.selectedDistrict)
-        if (district) {
-          text += ` ${district.name}`
-        }
-      }
-      
-      return text
+      if (!this.formData.selectedProvince || !this.formData.selectedDistrict)
+        return "";
+      const region = this.availableRegions.find(
+        (r) => r.id === this.formData.selectedProvince
+      );
+      if (!region) return "";
+      const district = region.districts.find(
+        (d) => d.id === this.formData.selectedDistrict
+      );
+      if (!district) return "";
+      return `${region.name} ${district.name}`;
     },
-    
-    // 현재 선택된 지역이 유효한지 확인
     isRegionSelectionValid() {
-      return this.formData.selectedProvince && this.formData.selectedDistrict
+      return this.formData.selectedProvince && this.formData.selectedDistrict;
     },
-    
-    // 선택된 지역을 목록에 추가
     addSelectedRegion() {
-      if (!this.isRegionSelectionValid()) return
-      
-      const regionText = this.getSelectedRegionText()
-      const regionData = {
-        province: this.formData.selectedProvince,
-        district: this.formData.selectedDistrict,
-        text: regionText
-      }
-      
-      // 중복 체크
-      const isDuplicate = this.formData.selectedRegions.some(r => 
-        r.province === regionData.province && 
-        r.district === regionData.district
-      )
-      
+      if (!this.isRegionSelectionValid()) return;
+      const regionText = this.getSelectedRegionText();
+      const isDuplicate = this.formData.selectedRegions.some(
+        (r) => r.text === regionText
+      );
       if (!isDuplicate) {
-        this.formData.selectedRegions.push(regionData)
-        
-        // 선택 초기화
-        this.formData.selectedProvince = ''
-        this.formData.selectedDistrict = ''
+        this.formData.selectedRegions.push({ text: regionText });
       }
+      this.formData.selectedProvince = "";
+      this.formData.selectedDistrict = "";
     },
-    
-    // 선택된 지역 제거
     removeRegion(index) {
-      this.formData.selectedRegions.splice(index, 1)
+      this.formData.selectedRegions.splice(index, 1);
     },
-    
-    // 선택된 모든 지역 ID 가져오기 (폼 검증용)
-    getAllSelectedRegionIds() {
-      const ids = []
-      
-      this.formData.selectedRegions.forEach(region => {
-        if (region.district) {
-          ids.push(region.district)
+    async handleSubmit() {
+      if (!this.isFormValid) return;
+
+      this.isLoading = true;
+      this.errorMessage = "";
+
+      const payload = {
+        email: this.formData.email,
+        regions: this.formData.selectedRegions.map((r) => r.text),
+        frequency: this.formData.reportFrequency,
+      };
+
+      try {
+        const response = await fetch(
+          "http://localhost:8080/api/subscriptions",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        if (!response.ok) {
+          const errorResult = await response
+            .json()
+            .catch(() => ({ message: "서버에서 오류가 발생했습니다." }));
+          throw new Error(
+            errorResult.message || "구독 신청 중 오류가 발생했습니다."
+          );
         }
-      })
-      
-      return ids
-    },
-    
-    handleSubmit() {
-      if (this.isFormValid) {
-        // 여기에 실제 API 호출 로직을 추가할 수 있습니다
-        console.log('가입 정보:', this.formData)
-        console.log('선택된 지역 ID들:', this.getAllSelectedRegionIds())
-        this.isSubmitted = true
-        
-        // 폼 초기화
-        this.formData = {
-          email: '',
-          selectedProvince: '',
-          selectedDistrict: '',
-          selectedRegions: [],
-          reportFrequency: 'daily'
-        }
+
+        const result = await response.json();
+        console.log("가입 성공:", result);
+        this.isSubmitted = true;
+      } catch (error) {
+        console.error("가입 실패:", error);
+        this.errorMessage = error.message;
+      } finally {
+        this.isLoading = false;
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -542,16 +386,6 @@ export default {
   cursor: not-allowed;
 }
 
-.province-dropdown {
-  border-color: #667eea;
-  background: #f8f9ff;
-}
-
-.district-dropdown {
-  border-color: #28a745;
-  background: #f8fff9;
-}
-
 .add-region-btn {
   padding: 8px 16px;
   background: #28a745;
@@ -576,21 +410,6 @@ export default {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-}
-
-.selected-region-display {
-  margin-top: 20px;
-  padding: 15px;
-  background: #e8f5e8;
-  border-radius: 8px;
-  border: 1px solid #c3e6cb;
-}
-
-.selected-region-display h4 {
-  margin-bottom: 10px;
-  color: #155724;
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .all-selected-regions {
@@ -718,18 +537,6 @@ export default {
   pointer-events: auto;
 }
 
-.help-tooltip .tooltip-content p {
-  margin: 0 0 8px 0;
-}
-
-.help-tooltip .tooltip-content p:last-child {
-  margin-bottom: 0;
-}
-
-.help-tooltip .tooltip-content strong {
-  color: #ffd700;
-}
-
 .report-options {
   display: flex;
   gap: 2rem;
@@ -763,7 +570,7 @@ export default {
 }
 
 .radio-option input[type="radio"]:checked + .radio-custom::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -818,24 +625,9 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-@media (max-width: 768px) {
-  .signup-container {
-    padding: 2rem;
-    margin: 1rem;
-  }
-  
-  .report-options {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .region-selection {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .region-dropdown {
-    min-width: 100%;
-  }
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 1rem;
 }
 </style>
