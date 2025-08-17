@@ -2,9 +2,9 @@
   <div id="app">
     <header class="header">
       <div class="header-content">
-        <div class="logo">
+        <router-link to="/" class="logo-link">
           <h1>요기조심</h1>
-        </div>
+        </router-link>
         <button class="subscribe-btn" @click="scrollToSignup">
           무료 구독하기
         </button>
@@ -14,29 +14,29 @@
     <router-view />
 
     <footer class="footer">
-      <p>&copy; 2024 요기조심. 안전한 지역사회를 만들어갑니다.</p>
+      <p>&copy; 2025 요기조심. 안전한 지역사회를 만들어갑니다.</p>
     </footer>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'App',
+  name: "App",
   methods: {
     scrollToSignup() {
       // Home 컴포넌트의 signupSection으로 스크롤
-      const signupSection = document.querySelector('.signup-section');
+      const signupSection = document.querySelector(".signup-section");
       if (signupSection) {
-        signupSection.scrollIntoView({ behavior: 'smooth' });
+        signupSection.scrollIntoView({ behavior: "smooth" });
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style>
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: #ffffff;
   min-height: 100vh;
   margin: 0;
@@ -82,6 +82,11 @@ body {
   font-weight: 700;
 }
 
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
 .subscribe-btn {
   padding: 10px 20px;
   background: #28a745;
@@ -119,7 +124,7 @@ body {
   .header h1 {
     font-size: 1.5rem;
   }
-  
+
   .subscribe-btn {
     padding: 8px 16px;
     font-size: 0.9rem;
