@@ -1,92 +1,159 @@
 <template>
   <div class="container">
-    <div v-if="isLoading">
-      <h2>처리 중입니다...</h2>
+    <div v-if="isLoading" class="card loading">
+      <div class="spinner"></div>
+      <h2>열심히 처리 중이에요... 🏃‍♀️</h2>
     </div>
-    <div v-else>
-      <h2 :class="{ 'error-message': isError }">{{ message }}</h2>
-      <p v-if="!isError">이제 이 창을 닫으셔도 좋습니다.</p>
+
+    <div v-else class="card result">
+      <template v-if="!isError">
+        <div class="icon">🥹</div>
+        <h2>구독이 취소되었어요</h2>
+        <p>다음에 꼭 다시 만나요!</p>
+      </template>
+      <template v-else>
+        <div class="icon">😭</div>
+        <h2 class="error-message">{{ message }}</h2>
+        <p>문제가 계속되면 관리자에게 문의해주세요.</p>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const isLoading = ref(true);
-const message = ref('');
+const message = ref("");
 const isError = ref(false);
 
 onMounted(async () => {
-  // 1. URL에서 토큰 가져오기
   const token = route.query.token;
 
   if (!token) {
-    message.value = '유효하지 않은 접근입니다.';
+    message.value = "유효하지 않은 접근이에요! 👀";
     isError.value = true;
     isLoading.value = false;
     return;
   }
 
   try {
-    // 2. 백엔드 DELETE API 호출
-    const response = await fetch(`http://localhost:8080/api/subscriptions/unsubscribe?token=${token}`, {
-      method: 'DELETE',
-    });
+    const response = await fetch(
+      `http://localhost:8080/api/subscriptions/unsubscribe?token=${token}`,
+      {
+        method: "DELETE",
+      }
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || '서버에서 오류가 발생했습니다.');
+      throw new Error(data.message || "알 수 없는 오류가 발생했어요.");
     }
-    
-    // 3. 성공 메시지 설정
-    message.value = data.message;
-    isError.value = false;
 
+    isError.value = false;
   } catch (error) {
-    console.error('Unsubscribe failed:', error);
-    message.value = error.message || '구독 취소 중 문제가 발생했습니다.';
+    console.error("Unsubscribe failed:", error);
+    message.value = error.message || "구독 취소에 실패했어요... 힝 😥";
     isError.value = true;
   } finally {
-    isLoading.value = false;
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 1000);
   }
 });
 </script>
 
 <style scoped>
+/* --- 폰트 관련 코드 수정 --- */
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background-color: #f0f3f0;
+  /* 일반적인 시스템 폰트로 변경 */
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", sans-serif;
+  padding: 1rem;
+}
+
+.card {
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   text-align: center;
-  background: #f8f9fa;
+  max-width: 450px;
+  width: 100%;
+  border: 2px solid #e9e9e9;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.icon {
+  font-size: 4rem;
+  line-height: 1;
+  animation: bounce 0.8s infinite;
 }
 
 h2 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  font-size: 2rem;
+  color: #3e3e3e;
+  /* 폰트가 작아보일 수 있어 크기를 살짝 키움 */
+  font-size: 1.8rem;
+  margin: 1rem 0;
+  font-weight: 600; /* 폰트 굵기 조정 */
 }
 
 p {
-  color: #666;
+  color: #7d7d7d;
   font-size: 1.1rem;
 }
 
 .error-message {
-  color: #e74c3c;
+  color: #ff6b6b;
 }
 
-.container > div {
-  background: white;
-  padding: 3rem;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  width: 90%;
+/* --- 로딩 애니메이션 --- */
+.loading h2 {
+  font-size: 1.5rem;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 5px solid #dcdcdc;
+  border-top-color: #ff87ab;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+/* --- Keyframes 애니메이션 --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 </style>
