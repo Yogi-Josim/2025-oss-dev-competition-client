@@ -151,6 +151,8 @@
 </template>
 
 <script>
+import { API_ENDPOINTS, apiRequest } from '../api/apis.js';
+
 export default {
   name: "SignupSection",
   data() {
@@ -179,14 +181,10 @@ export default {
   },
   async created() {
     try {
-      const response = await fetch("http://localhost:8080/api/regions");
-      if (!response.ok) {
-        throw new Error("지역 목록을 불러오는 데 실패했습니다.");
-      }
-      const data = await response.json();
+      const data = await apiRequest(API_ENDPOINTS.REGIONS);
       this.availableRegions = data;
     } catch (error) {
-      console.error(error);
+      console.error("지역 목록을 불러오는 데 실패했습니다:", error);
     }
   },
   methods: {
@@ -244,25 +242,11 @@ export default {
       };
 
       try {
-        const response = await fetch(
-          "http://localhost:8080/api/subscriptions",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          }
-        );
-
-        if (!response.ok) {
-          const errorResult = await response
-            .json()
-            .catch(() => ({ message: "서버에서 오류가 발생했습니다." }));
-          throw new Error(
-            errorResult.message || "구독 신청 중 오류가 발생했습니다."
-          );
-        }
-
-        const result = await response.json();
+        const result = await apiRequest(API_ENDPOINTS.SUBSCRIPTIONS, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        
         console.log("가입 성공:", result);
         this.isSubmitted = true;
       } catch (error) {

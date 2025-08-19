@@ -23,6 +23,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { API_ENDPOINTS, apiRequest } from '../api/apis.js';
 
 const route = useRoute();
 const isLoading = ref(true);
@@ -40,18 +41,10 @@ onMounted(async () => {
   }
 
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/subscriptions/unsubscribe?token=${token}`,
-      {
-        method: "DELETE",
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "알 수 없는 오류가 발생했어요.");
-    }
+    await apiRequest(API_ENDPOINTS.UNSUBSCRIBE, {
+      method: "DELETE",
+      params: { token },
+    });
 
     isError.value = false;
   } catch (error) {
