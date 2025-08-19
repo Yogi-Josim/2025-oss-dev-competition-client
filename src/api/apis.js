@@ -24,6 +24,12 @@ export const API_ENDPOINTS = {
 export const createApiUrl = (endpoint, params = {}) => {
   const url = new URL(`${API_BASE_URL}${endpoint}`);
   
+  console.log('🔗 URL 생성:', {
+    API_BASE_URL,
+    endpoint,
+    finalUrl: url.toString()
+  });
+  
   // 쿼리 파라미터 추가
   Object.keys(params).forEach(key => {
     if (params[key] !== undefined && params[key] !== null) {
